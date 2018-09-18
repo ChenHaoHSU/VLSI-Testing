@@ -1,0 +1,4 @@
+*.o
+*.
+!.git
+!.gitignore
