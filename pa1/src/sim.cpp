@@ -7,6 +7,7 @@
 
 #include "atpg.h"
 #include "logic_tbl.h"
+#include <cassert>
 
 /*
 *   sim
@@ -27,15 +28,22 @@ void ATPG::sim(void) {
 
   ncktin = cktin.size();
   nckt = sort_wlist.size();
+
   /* for every input */
+  for (i = 0; i < nckt; ++i) assert(sort_wlist[i]->inode.size() == 1);
   /*TODO1*/
   //Hint:For every primary input. schedule the gates connected to it
   //---------------------------------------- hole ---------------------------------------------
-      
+  for (i = 0; i < nckt; ++i) sort_wlist[i]->flag &= ~SCHEDULED;
+  for (i = 0; i < ncktin; ++i) {
+    if (cktin[i]->flag & CHANGED) {
+      nout = cktin[i]->onode.size();
+      for (j = 0; j < nout; ++j) 
+        cktin[i]->onode[j]->flag |= SCHEDULED;
+    }
+  }
   //-------------------------------------------------------------------------------------------
   /*TODO1*/
-
-
 
   /*TODO2*/
   //Hint:
@@ -44,11 +52,19 @@ void ATPG::sim(void) {
    * Because the wires are sorted according to their levels,
    * it is correct to evaluate the wires in increasing order. */
   //---------------------------------------- hole ---------------------------------------------
-      
+  for (i = 0; i < nckt; ++i) {
+    if (sort_wlist[i]->inode.front()->flag & SCHEDULED) {
+      evaluate(sort_wlist[i]->inode.front());
+      if (sort_wlist[i]->flag & CHANGED) {
+        sort_wlist[i]->flag &= ~SCHEDULED;
+        nout = sort_wlist[i]->onode.size();
+        for (j = 0; j < nout; ++j)
+          sort_wlist[i]->onode[j]->flag |= SCHEDULED;
+      }      
+    }
+  }
   //-------------------------------------------------------------------------------------------
   /*TODO2*/
-
-
   
 }/* end of sim */
 

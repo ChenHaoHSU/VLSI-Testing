@@ -1,18 +1,21 @@
 #
 
-CFLAGS = -std=c++11 -O3
+CFLAGS    = -std=c++11 -g
+CFLAGS    = -std=c++11 -O3
 
-FILES = atpg.o tpgmain.o input.o level.o sim.o podem.o test.o init_flist.o faultsim.o display.o
+CSRCS     = $(wildcard *.cpp)
+FILES     = $(addsuffix .o, $(basename $(CSRCS)))
 
 atpg : $(FILES) 
 	g++ $(CFLAGS) $(FILES) -lm -o atpg
 %.o : %.cpp atpg.h logic_tbl.h
-	g++ $(CFLAGS) -c atpg.cpp
+	g++ $(CFLAGS) -c $<
 clean:
 	rm *.o
 direct:
 	g++ $(CFLAGS)$(FILES:.o=.cpp) -o atpg
 
+# FILES = atpg.o tpgmain.o input.o level.o sim.o podem.o test.o init_flist.o faultsim.o display.o
 # atpg.o : atpg.h
 # 	g++ $(CFLAGS) -c atpg.cpp
 # tpgmain.o : atpg.h tpgmain.cpp

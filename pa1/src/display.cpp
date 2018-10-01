@@ -52,7 +52,7 @@ void ATPG::display_io(void) {
     }
   }
   fprintf(stdout,"'");
-/*
+
   fprintf(stdout," ");
   for (i = 0; i < cktout.size(); i++) {
     switch (cktout[i]->value) {
@@ -63,7 +63,7 @@ void ATPG::display_io(void) {
       case B: fprintf(stdout,"B"); break;
     }
   }
-*/
+
   fprintf(stdout,"\n");
 }/* end of display_io */
 

@@ -218,6 +218,10 @@ void ATPG::input(const string& infile) {
     ncktnode += distance(hash_nlist[i].begin(), hash_nlist[i].end());
     ncktwire += distance(hash_wlist[i].begin(), hash_wlist[i].end());
   }
+
+  //////////////////////////////////////
+  // debug = 1;
+  //////////////////////////////////////
   
   file.close();
   create_structure();
