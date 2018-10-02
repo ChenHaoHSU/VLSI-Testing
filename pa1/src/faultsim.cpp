@@ -6,7 +6,6 @@
 /**********************************************************************/
 
 #include "atpg.h"
-#include <cassert>
 
 /* pack 16 faults into one packet.  simulate 16 faults togeter. 
  * the following variable name is somewhat misleading */
@@ -91,7 +90,7 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
    * the undetected fault list is linked by pnext_undetect */
   for (auto pos = flist_undetect.cbegin(); pos != flist_undetect.cend(); ++pos) {
     f = *pos;
-    if (f->detect == REDUNDANT) { continue;} /* ignore redundant faults */
+    if (f->detect == REDUNDANT) { continue; } /* ignore redundant faults */
 
     /* consider only active (aka. excited) fault
      * (sa1 with correct output of 0 or sa0 with correct output of 1) */
@@ -191,13 +190,12 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
 	      }
 	    } /* event evaluations end here */
 	  
-	   /* pop out all faulty wires from the wlist_faulty
-		 * if PO's value is different from good PO's value, and it is not unknown
-		 * then the fault is detected.
-		 * 
-		 * IMPORTANT! remember to reset the wires' faulty values back to fault-free values.
-	   */
-      int bDetected = false;
+	    /* pop out all faulty wires from the wlist_faulty
+		   * if PO's value is different from good PO's value, and it is not unknown
+		   * then the fault is detected.
+		   * 
+		   * IMPORTANT! remember to reset the wires' faulty values back to fault-free values.
+	     */
       while(!wlist_faulty.empty()) {
         w = wlist_faulty.front();
         wlist_faulty.pop_front();
@@ -209,26 +207,19 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
         /*TODO*/
         //Hint:Use mask to get the value of faulty wire and check every fault in packet
         //---------------------------------------- hole ---------------------------------------------
-        /* Reset the wires' faulty values back to fault-free values.
-         */
-        // int nout = w->onode.size();
-        // for (i = 0; i < nout; ++i) {
-        //   if (w->onode[i]->type == OUTPUT) {
-        //     for (int m = 0; m < num_of_pattern; ++m) {
-        //       int v1 = w->wire_value1 & Mask[m];
-        //       int v2 = w->wire_value2 & Mask[m];
-        //       int v1_unknown = w->wire_value1 & Unknown[m];
-        //       int v2_unknown = w->wire_value2 & Unknown[m];
-        //       if ( (v1 != v1_unknown) && (v2 != v2_unknown) && v1 != v2)
-        //         bDetected = true;
-        //     }
-        //   }
-        // }
-        // w->wire_value2 = w->wire_value1;
+        if (w->flag & OUTPUT) {
+          for (i = 0; i < num_of_fault; ++i) {
+            const int v1 = w->wire_value1 & Mask[i]; // good value
+            const int v2 = w->wire_value2 & Mask[i]; // faulty value
+            if ((v1 != v2) && (v1 != Unknown[i]) && (v2 != Unknown[i])) {
+              simulated_fault_list[i]->detect = TRUE;
+            }
+          }
+        }
+        w->wire_value2 = w->wire_value1; // Reset the wires' faulty values back to fault-free values.
         //-------------------------------------------------------------------------------------------
         /*TODO*/
 	    } // pop out all faulty wires
-      if (bDetected) ++num_of_current_detect;
       num_of_fault = 0;  // reset the counter of faults in a packet
       start_wire_index = 10000;  //reset this index to a very large value.
     } // end fault sim of a packet
@@ -432,7 +423,8 @@ void ATPG::inject_fault_value(const wptr faulty_wire, const int& bit_position, c
     faulty_wire->wire_value2 |= Mask[bit_position];
   else if (fault_type == STUCK0)
     faulty_wire->wire_value2 &= ~Mask[bit_position];
-  else assert(false);
+  else
+    fprintf(stderr,"Ignore the fault type (%d)!\n", fault_type);
   //-------------------------------------------------------------------------------------------
   /*TODO*/
 }/* end of inject_fault_value */
