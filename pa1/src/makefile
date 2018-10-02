@@ -10,7 +10,7 @@ CHDRS     = $(wildcard *.h)
 CSRCS     = $(wildcard *.cpp)
 COBJS     = $(addsuffix .o, $(basename $(CSRCS)))
 
-atpg : $(COBJS) 
+$(EXE) : $(COBJS) 
 	$(CXX) $(CFLAGS) $(COBJS) -lm -o $(EXE)
 %.o : %.cpp $(CHDRS)
 	$(CXX) $(CFLAGS) -c $<
