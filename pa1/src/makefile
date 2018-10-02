@@ -11,11 +11,11 @@ COBJS     = $(addsuffix .o, $(basename $(CSRCS)))
 ECHO      = echo
 RM        = rm -rf
 
-$(EXE) : $(COBJS)
+$(EXE): $(COBJS)
 	@$(ECHO) ">> Building $(EXE) ..."
 	@$(CXX) $(CFLAGS) $(COBJS) -lm -o $(EXE)
-	
-%.o : %.cpp $(CHDRS)
+
+%.o: %.cpp $(CHDRS)
 	@$(ECHO) "> Compiling $< ..."
 	@$(CXX) $(CFLAGS) -c $<
 
