@@ -1,12 +1,12 @@
 
-CFLAGS    = -std=c++11 -g
-CFLAGS    = -std=c++11 -O3
-
 EXE       = atpg
 CXX       = g++
 CHDRS     = $(wildcard *.h)
 CSRCS     = $(wildcard *.cpp)
 COBJS     = $(addsuffix .o, $(basename $(CSRCS)))
+
+CFLAGS    = -std=c++11 -g -Wall
+CFLAGS    = -std=c++11 -O3
 
 ECHO      = echo
 RM        = rm -rf
