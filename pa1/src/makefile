@@ -7,17 +7,22 @@ CXX       = g++
 CHDRS     = $(wildcard *.h)
 CSRCS     = $(wildcard *.cpp)
 COBJS     = $(addsuffix .o, $(basename $(CSRCS)))
+
+ECHO      = echo
 RM        = rm -rf
 
 $(EXE) : $(COBJS)
-	@echo ">> Building $(EXE) ..."
+	@$(ECHO) ">> Building $(EXE) ..."
 	@$(CXX) $(CFLAGS) $(COBJS) -lm -o $(EXE)
+	
 %.o : %.cpp $(CHDRS)
-	@echo "> Compiling $< ..."
+	@$(ECHO) "> Compiling $< ..."
 	@$(CXX) $(CFLAGS) -c $<
+
 clean:
 	@$(RM) $(EXE) *.o
+
 direct:
-	@echo "> Compiling all ..."
+	@$(ECHO) "> Compiling all ..."
 	@$(CXX) $(CFLAGS) $(COBJS:.o=.cpp) -o $(EXE)
-	@echo ">> Building $(EXE) ..."
+	@$(ECHO) ">> Building $(EXE) ..."
