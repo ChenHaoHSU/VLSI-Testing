@@ -7,7 +7,6 @@
 
 #include "atpg.h"
 #include "logic_tbl.h"
-#include <cassert>
 
 /*
 *   sim
@@ -53,7 +52,6 @@ void ATPG::sim(void) {
    * it is correct to evaluate the wires in increasing order. */
   //---------------------------------------- hole ---------------------------------------------
   for (i = 0; i < nckt; ++i) {
-    assert(sort_wlist[i]->inode.size() == 1);
     if (sort_wlist[i]->inode.front()->flag & SCHEDULED) {
       evaluate(sort_wlist[i]->inode.front());
       if (sort_wlist[i]->flag & CHANGED) {

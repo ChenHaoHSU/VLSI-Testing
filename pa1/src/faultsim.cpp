@@ -26,7 +26,8 @@ void ATPG::fault_simulate_vectors(int& total_detect_num) {
   for (i = vectors.size()-1; i >= 0; i--) {
     fault_sim_a_vector(vectors[i], current_detect_num);
     total_detect_num += current_detect_num;
-    fprintf(stdout,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
+    // fprintf(stdout,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
+    fprintf(stderr,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
   }
 }// fault_simulate_vectors
 

@@ -12,17 +12,17 @@ ECHO      = echo
 RM        = rm -rf
 
 $(EXE): $(COBJS)
-	@$(ECHO) ">> Building $(EXE) ..."
+	@$(ECHO) "[Build] $(EXE)"
 	@$(CXX) $(CFLAGS) $(COBJS) -lm -o $(EXE)
 
 %.o: %.cpp $(CHDRS)
-	@$(ECHO) "> Compiling $< ..."
+	@$(ECHO) "[Compile] $<"
 	@$(CXX) $(CFLAGS) -c $<
 
 clean:
 	@$(RM) $(EXE) *.o
 
 direct:
-	@$(ECHO) "> Compiling all ..."
+	@$(ECHO) "[Compile] All"
 	@$(CXX) $(CFLAGS) $(COBJS:.o=.cpp) -o $(EXE)
-	@$(ECHO) ">> Building $(EXE) ..."
+	@$(ECHO) "[Build] $(EXE) ..."
