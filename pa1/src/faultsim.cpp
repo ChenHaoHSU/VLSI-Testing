@@ -212,8 +212,11 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
           for (i = 0; i < num_of_fault; ++i) {
             const int v1 = w->wire_value1 & Mask[i]; // good value
             const int v2 = w->wire_value2 & Mask[i]; // faulty value
-            if ((v1 != v2) && (v1 != Unknown[i]) && (v2 != Unknown[i]))
-              simulated_fault_list[i]->detect = TRUE;
+            if ((v1 != v2) && (v1 != Unknown[i]) && (v2 != Unknown[i])) {
+              simulated_fault_list[i]->detect_time += 1;
+              if (simulated_fault_list[i]->detect_time >= this->ndet)
+                simulated_fault_list[i]->detect = TRUE;
+            }
           }
         }
         w->wire_value2 = w->wire_value1; // IMPORTANT! remember to reset the wires' faulty values back to fault-free values.

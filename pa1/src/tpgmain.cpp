@@ -33,6 +33,14 @@ main(int argc, char *argv[]) {
       atpg.set_fsim_only(true);
       i+=2;
     }
+    else if (strcmp(argv[i],"-ndet") == 0) {
+      if (atoi(argv[i+1]) < 1) {
+        fprintf(stderr, "atpg: ndet should >= 1\n");
+        usage();
+      }
+      atpg.set_ndet(atoi(argv[i+1]));
+      i+=2;
+    }
     else if (argv[i][0] == '-') {
       j = 1;
       while (argv[i][j] != '\0') {
@@ -44,7 +52,7 @@ main(int argc, char *argv[]) {
           usage();
         }
       }
-      i++ ;
+      i++;
     }
     else {
       inpFile = string(argv[i]);
@@ -131,4 +139,8 @@ void ATPG::set_total_attempt_num(const int& i) {
 
 void ATPG::set_backtrack_limit(const int& i) {
   this->backtrack_limit = i;
+}
+
+void ATPG::set_ndet(const int& i) {
+  this->ndet = i;
 }

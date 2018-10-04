@@ -13,6 +13,7 @@ ATPG::ATPG() {
   this->backtrack_limit = 50;     /* default value */
   this->total_attempt_num = 1;    /* default value */
   this->fsim_only = false;        /* flag to indicate fault simulation only */
+  this->ndet = 1;                 /* Bonus: number of detect time */
   
   /* orginally assigned in input.c */
   this->debug = 0;                /* != 0 if debugging;  this is a switch of debug mode */
@@ -55,5 +56,6 @@ ATPG::FAULT::FAULT() {
   this->eqv_fault_num = 0;
   this->to_swlist = 0;
   this->fault_no = 0;
+  this->detect_time = 0;
 }
 
