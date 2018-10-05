@@ -217,7 +217,8 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
             }
           }
         }
-        w->wire_value2 = w->wire_value1; // IMPORTANT! remember to reset the wires' faulty values back to fault-free values.
+        w->wire_value2 = w->wire_value1; // IMPORTANT! remember to reset the wires' faulty values 
+                                         // back to fault-free values.
         //-------------------------------------------------------------------------------------------
         /*TODO*/
 	    } // pop out all faulty wires
