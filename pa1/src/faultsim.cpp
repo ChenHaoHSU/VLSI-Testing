@@ -26,8 +26,8 @@ void ATPG::fault_simulate_vectors(int& total_detect_num) {
   for (i = vectors.size()-1; i >= 0; i--) {
     fault_sim_a_vector(vectors[i], current_detect_num);
     total_detect_num += current_detect_num;
-    // fprintf(stdout,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
-    fprintf(stderr,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
+    fprintf(stdout,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
+    // fprintf(stderr,"vector[%d] detects %d faults (%d)\n",i,current_detect_num,total_detect_num);
   }
 }// fault_simulate_vectors
 
@@ -213,9 +213,7 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
             const int v1 = w->wire_value1 & Mask[i]; // good value
             const int v2 = w->wire_value2 & Mask[i]; // faulty value
             if ((v1 != v2) && (v1 != Unknown[i]) && (v2 != Unknown[i])) {
-              simulated_fault_list[i]->detect_time += 1;
-              if (simulated_fault_list[i]->detect_time >= this->ndet)
-                simulated_fault_list[i]->detect = TRUE;
+              simulated_fault_list[i]->detect = TRUE;
             }
           }
         }
@@ -232,8 +230,15 @@ void ATPG::fault_sim_a_vector(const string& vec, int& num_of_current_detect) {
   flist_undetect.remove_if(
     [&](const fptr fptr_ele){
       if (fptr_ele->detect == TRUE) {
-        num_of_current_detect += fptr_ele->eqv_fault_num;
-        return true;
+        fptr_ele->detect_time += 1;
+        if (fptr_ele->detect_time >= ndet) {
+          num_of_current_detect += fptr_ele->eqv_fault_num;
+          return true;
+        }
+        else {
+          fptr_ele->detect = FALSE;
+          return false;
+        }
       }
       else {
         return false;
