@@ -1,0 +1,22 @@
+#################################################
+# File     [ readme ]
+# Author   [ Chen-Hao Hsu ]
+# Synopsis [ Readme file for VLSI Testing pa1]
+# Date     [ 2018/10/05 created ]
+#################################################
+
+(1) How to compile
+
+    To compile the code, please follow the commands
+      1. cd src/
+      2. make
+    The binary file "atpg" will be built in the path src/.
+
+==================================================
+
+(2) Reports
+
+    The files "report.doc" and "report.pdf" are the 
+    reports for this programming assigment.
+
+==================================================
