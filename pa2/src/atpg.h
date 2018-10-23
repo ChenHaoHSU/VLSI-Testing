@@ -19,6 +19,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <cassert>
+#include <set>
 
 #define HASHSIZE 3911
 

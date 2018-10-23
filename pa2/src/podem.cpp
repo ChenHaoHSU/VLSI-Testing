@@ -385,7 +385,6 @@ ATPG::wptr ATPG::find_pi_assignment(const wptr object_wire, const int& object_le
 /* Fig 9.4 */
 ATPG::wptr ATPG::find_hardest_control(const nptr n) {
   int i;
-  
   /* because gate inputs are arranged in a increasing level order,
    * larger input index means harder to control */
   for (i = n->iwire.size() - 1; i >= 0; i--) {
@@ -401,7 +400,9 @@ ATPG::wptr ATPG::find_easiest_control(const nptr n) {
   // TODO  find the input with min level
   // Hint: similar to hardiest_control but increasing level order
   //--------------------------------- hole -------------------------------------------
-
+  for (i = 0, nin = n->iwire.size(); i < nin; ++i) {
+    if (n->iwire[i]->value == U) return n->iwire[i];
+  }
   //----------------------------------------------------------------------------------
   //  TODO 
   return(nullptr);
@@ -445,10 +446,31 @@ ATPG::nptr ATPG::find_propagate_gate(const int& level) {
 bool ATPG::trace_unknown_path(const wptr w) {
   int i,nout;
   wptr wtemp;
+
 	//TODO search X-path
 	//HINT if w is PO, return TRUE, if not, check all its fanout 
 	//------------------------------------- hole ---------------------------------------
+  if (w->flag & OUTPUT) return true;
 
+  forward_list<wptr> wire_stack;
+  set<int> sMarkedWire;
+  wire_stack.push_front(w);
+  sMarkedWire.insert(w->wlist_index);
+
+  while (!wire_stack.empty()) {
+    wtemp = wire_stack.front();
+    wire_stack.pop_front();
+    if (wtemp->flag & OUTPUT) return true;
+    for (i = w->onode.size() - 1; i >= 0; --i) {
+      for (wptr wout : w->onode[i]->owire) {
+        if (sMarkedWire.count(wout->wlist_index) > 0) {
+          wire_stack.push_front(wout);
+          sMarkedWire.insert(wout->wlist_index);
+        }
+      }
+    }
+  }
+	//----------------------------------------------------------------------------------
   return false; // X-path disappear
   //TODO 
 }/* end of trace_unknown_path */
@@ -463,7 +485,12 @@ bool ATPG::check_test(void) {
 	//TODO check if any fault effect reach PO
 	//HINT check every PO for their value
 	//--------------------------------- hole -------------------------------------------
-
+  for (i = 0, ncktout = cktout.size(); i < ncktout; ++i) {
+    if (cktout[i]->value == B || cktout[i]->value == D) {
+      is_test = true;
+      break;
+    }
+  }
 	//----------------------------------------------------------------------------------
   //TODO
   return is_test;
@@ -551,8 +578,10 @@ int ATPG::set_uniquely_implied_value(const fptr fault) {
 	//TODO fault excitation
 	//HINT use backward_imply function to check if fault can excite or not
 	//------------------------------------ hole ----------------------------------------
-
-
+  if (pi_is_reach == TRUE) {
+    int faultValue = (fault->fault_type == STUCK0 ? 1 :0);
+    pi_is_reach = backward_imply(w, faultValue);
+  }
   //----------------------------------------------------------------------------------
   //TODO
 
