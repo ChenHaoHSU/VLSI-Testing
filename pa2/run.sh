@@ -6,6 +6,7 @@ RPTPATH=../reports/
 
 ALLCASES="17 432 499 880 1355 1908 2670 3540 5315 6288 7552"
 
+# Command-line
 if [ $# -eq 0 ]
 then
     CASES=$ALLCASES
@@ -13,6 +14,7 @@ else
     CASES=$1
 fi
 
+# Run cases
 for case in $CASES
 do
   CKT_FILE=c$case.ckt
