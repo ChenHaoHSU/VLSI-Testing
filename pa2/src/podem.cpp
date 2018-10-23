@@ -7,6 +7,7 @@
 
 #include "atpg.h"
 #include <set>
+#include <unordered_set>
 
 #define CONFLICT 2
 
@@ -455,7 +456,7 @@ bool ATPG::trace_unknown_path(const wptr w) {
   if (w->flag & OUTPUT) return true;
   // 2. If not, check all its fanout (DFS)
   forward_list<wptr> wire_stack;
-  set<int> sMarkedWire;
+  unordered_set<int> sMarkedWire;
   wire_stack.push_front(w);
   sMarkedWire.insert(w->wlist_index); // Mark discovered wires
   while (!wire_stack.empty()) {
@@ -580,9 +581,8 @@ int ATPG::set_uniquely_implied_value(const fptr fault) {
 	//TODO fault excitation
 	//HINT use backward_imply function to check if fault can excite or not
 	//------------------------------------ hole ----------------------------------------
-  const int faultValue = (fault->fault_type == STUCK1 ? 0 : 1);
-  int tmp_pi_is_reach = backward_imply(w, faultValue);
-  pi_is_reach = (tmp_pi_is_reach == TRUE || tmp_pi_is_reach == FALSE) ? TRUE : CONFLICT;
+  const int opposite_stuck_value = (fault->fault_type == STUCK0 ? 1 : 0);
+  pi_is_reach = (backward_imply(w, opposite_stuck_value) == CONFLICT ? CONFLICT : TRUE);
   //----------------------------------------------------------------------------------
   //TODO
 
