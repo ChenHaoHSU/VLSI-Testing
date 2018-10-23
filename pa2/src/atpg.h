@@ -78,6 +78,7 @@ public:
   void read_vectors(const string&);
   void set_total_attempt_num(const int&);
   void set_backtrack_limit(const int&);
+  void set_ndet(const int&);
   
   /* defined in input.cpp */
   void input(const string&);
@@ -125,6 +126,7 @@ private:
   int backtrack_limit;
   int total_attempt_num;
   bool fsim_only;                      /* flag to indicate fault simulation only */
+  int ndet;
   
   /* orginally declared input.c */
   int debug;                           /* != 0 if debugging;  this is a switch of debug mode */
@@ -245,15 +247,16 @@ private:
   public:
     FAULT();
     
-    nptr node;                 /* gate under test(NIL if PI/PO fault) */
-    short io;                  /* 0 = GI; 1 = GO */
-    short index;               /* index for GI fault. it represents the  
-			                            associated gate input index number for this GI fault */   
-    short fault_type;          /* s-a-1 or s-a-0 or slow-to-rise or slow-to-fall fault */
-    short detect;              /* detection flag */
-    bool test_tried;          /* flag to indicate test is being tried */
-    int eqv_fault_num;         /* number of equivalent faults */
-    int to_swlist;             /* index to the sort_wlist[] */ 
-    int fault_no;              /* fault index */
+    nptr   node;                  /* gate under test(NIL if PI/PO fault) */
+    short  io;                    /* 0 = GI; 1 = GO */
+    short  index;                 /* index for GI fault. it represents the  
+			                               associated gate input index number for this GI fault */   
+    short  fault_type;            /* s-a-1 or s-a-0 or slow-to-rise or slow-to-fall fault */
+    short  detect;                /* detection flag */
+    bool   test_tried;            /* flag to indicate test is being tried */
+    int    eqv_fault_num;         /* number of equivalent faults */
+    int    to_swlist;             /* index to the sort_wlist[] */ 
+    int    fault_no;              /* fault index */
+    int    detect_time;           /* Bonus: number of detect times */
   };
 };
