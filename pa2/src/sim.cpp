@@ -27,34 +27,44 @@ void ATPG::sim(void) {
 
   ncktin = cktin.size();
   nckt = sort_wlist.size();
-
   /* for every input */
-  /*TODO1*/
-  //Hint:For every primary input. schedule the gates connected to it
-  //---------------------------------------- hole ---------------------------------------------
-  for (i = 0; i < ncktin; ++i)                                        // For every primary input
-    for (j = 0, nout = cktin[i]->onode.size(); j < nout; ++j)         // Schedule the gates connected to it
-      cktin[i]->onode[j]->flag |= SCHEDULED;                          // Schedule the gates connected to it
-  //-------------------------------------------------------------------------------------------
-  /*TODO1*/
+  /*TODO*/
+  for (i = 0; i < ncktin; i++) {
+    
+    /* if a input has changed, schedule the gates connected to it */
+    if (sort_wlist[i]->flag & CHANGED) {
+      sort_wlist[i]->flag &= ~CHANGED;
+      for (j = 0, nout = sort_wlist[i]->onode.size(); j < nout; j++) {
+        if (!sort_wlist[i]->onode[j]->owire.empty()) {
+          sort_wlist[i]->onode[j]->owire.front()->flag |= SCHEDULED;
+        }
+      }
+    }
+  } // for every input
+  /*TODO*/
 
-  /*TODO2*/
-  //Hint:
+  /*TODO*/
   /* evaluate every scheduled gate & propagate any changes
    * walk through all wires in increasing order
    * Because the wires are sorted according to their levels,
    * it is correct to evaluate the wires in increasing order. */
-  //---------------------------------------- hole ---------------------------------------------
-  for (i = 0; i < nckt; ++i)                                           // Walk through all wires in increasing order
-    if (sort_wlist[i]->inode.front()->flag & SCHEDULED) {              // Evaluate every scheduled gate
-      sort_wlist[i]->inode.front()->flag &= ~SCHEDULED;                // Reset SCHEDULED flag
-      evaluate(sort_wlist[i]->inode.front());                          // Evaluate every scheduled gate
-      if (sort_wlist[i]->flag & CHANGED)                               // Propagate any changes
-        for (j = 0, nout = sort_wlist[i]->onode.size(); j < nout; ++j) // Propagate any changes
-          sort_wlist[i]->onode[j]->flag |= SCHEDULED;                  // Propagate any changes
+  for (i = ncktin; i < nckt; i++) {
+    if (sort_wlist[i]->flag & SCHEDULED) {
+      sort_wlist[i]->flag &= ~SCHEDULED;
+      evaluate(sort_wlist[i]->inode.front());
+      if (sort_wlist[i]->flag & CHANGED) {
+        sort_wlist[i]->flag &= ~CHANGED;
+        for (j = 0, nout = sort_wlist[i]->onode.size(); j < nout; j++) {
+          if (!sort_wlist[i]->onode[j]->owire.empty()) {
+            sort_wlist[i]->onode[j]->owire.front()->flag |= SCHEDULED;
+          }
+        }
+      }
     }
-  //-------------------------------------------------------------------------------------------
-  /*TODO2*/
+  }
+  /*TODO*/
+
+
   
 }/* end of sim */
 

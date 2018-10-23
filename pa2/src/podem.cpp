@@ -6,6 +6,7 @@
 /**********************************************************************/
 
 #include "atpg.h"
+#include <set>
 
 #define CONFLICT 2
 
@@ -450,20 +451,21 @@ bool ATPG::trace_unknown_path(const wptr w) {
 	//TODO search X-path
 	//HINT if w is PO, return TRUE, if not, check all its fanout 
 	//------------------------------------- hole ---------------------------------------
+  // 1. If w is PO, return TRUE
   if (w->flag & OUTPUT) return true;
-
+  // 2. If not, check all its fanout (DFS)
   forward_list<wptr> wire_stack;
   set<int> sMarkedWire;
   wire_stack.push_front(w);
-  sMarkedWire.insert(w->wlist_index);
-
+  sMarkedWire.insert(w->wlist_index); // Mark discovered wires
   while (!wire_stack.empty()) {
     wtemp = wire_stack.front();
     wire_stack.pop_front();
-    if (wtemp->flag & OUTPUT) return true;
-    for (i = w->onode.size() - 1; i >= 0; --i) {
-      for (wptr wout : w->onode[i]->owire) {
-        if (sMarkedWire.count(wout->wlist_index) > 0) {
+    for (i = wtemp->onode.size() - 1; i >= 0; --i) {
+      for (wptr wout : wtemp->onode[i]->owire) {
+        if (sMarkedWire.count(wout->wlist_index) == 0
+           && wout->value == U) {
+          if (wout->flag & OUTPUT) return true;
           wire_stack.push_front(wout);
           sMarkedWire.insert(wout->wlist_index);
         }
@@ -486,7 +488,7 @@ bool ATPG::check_test(void) {
 	//HINT check every PO for their value
 	//--------------------------------- hole -------------------------------------------
   for (i = 0, ncktout = cktout.size(); i < ncktout; ++i) {
-    if (cktout[i]->value == B || cktout[i]->value == D) {
+    if ((cktout[i]->value == B) || (cktout[i]->value == D)) {
       is_test = true;
       break;
     }
@@ -578,10 +580,9 @@ int ATPG::set_uniquely_implied_value(const fptr fault) {
 	//TODO fault excitation
 	//HINT use backward_imply function to check if fault can excite or not
 	//------------------------------------ hole ----------------------------------------
-  if (pi_is_reach == TRUE) {
-    int faultValue = (fault->fault_type == STUCK0 ? 1 :0);
-    pi_is_reach = backward_imply(w, faultValue);
-  }
+  const int faultValue = (fault->fault_type == STUCK1 ? 0 : 1);
+  int tmp_pi_is_reach = backward_imply(w, faultValue);
+  pi_is_reach = (tmp_pi_is_reach == TRUE || tmp_pi_is_reach == FALSE) ? TRUE : CONFLICT;
   //----------------------------------------------------------------------------------
   //TODO
 
@@ -674,7 +675,7 @@ int ATPG::backward_imply(const wptr current_wire, const int& desired_logic_value
           case TRUE: pi_is_reach = TRUE; break;
           case CONFLICT: return(CONFLICT); break;
           case FALSE: break;
-         }
+        }
         break;
     }
 	
