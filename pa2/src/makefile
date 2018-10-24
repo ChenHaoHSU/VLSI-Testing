@@ -20,4 +20,4 @@ $(EXE): $(COBJS)
 	@$(CXX) $(CFLAGS) -c $<
 
 clean:
-	@$(RM) $(EXE) *.o
+	@$(RM) $(EXE) $(COBJS)
