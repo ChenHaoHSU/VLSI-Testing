@@ -455,26 +455,37 @@ bool ATPG::trace_unknown_path(const wptr w) {
   // 1. If w is PO, return TRUE
   if (w->flag & OUTPUT) return true;
   // 2. If not, check all its fanout (DFS)
+  #define DFS_MARKED 2048
   forward_list<wptr> wire_stack;
-  unordered_set<int> hash_marked_wires;
-  wire_stack.push_front(w); // push to stack
-  hash_marked_wires.insert(w->wlist_index); // Mark discovered wires
+  forward_list<wptr> marked_wires_flist;
+  auto clear_and_return = [&](const bool ret) -> bool {
+    while(!marked_wires_flist.empty()) {
+      marked_wires_flist.front()->flag &= ~DFS_MARKED;
+      marked_wires_flist.pop_front();
+    }
+    return ret;
+  };
+  auto push2stack_and_mark = [&](wptr w) {
+    wire_stack.push_front(w);         // push to stack
+    w->flag |= DFS_MARKED;            // Mark discovered wires
+    marked_wires_flist.push_front(w); // Add to marked list
+  };
+  push2stack_and_mark(w);
   while (!wire_stack.empty()) {
     wtemp = wire_stack.front(); // stack pop
-    wire_stack.pop_front();
+    wire_stack.pop_front();     // stack pop
     for (i = wtemp->onode.size() - 1; i >= 0; --i) {
       for (wptr wout : wtemp->onode[i]->owire) {
-        if (hash_marked_wires.count(wout->wlist_index) == 0
-            && wout->value == U) {
-          if (wout->flag & OUTPUT) return true;
-          wire_stack.push_front(wout);
-          hash_marked_wires.insert(wout->wlist_index);
+        if (!(wout->flag & DFS_MARKED) && (wout->value == U)) {
+          if (wout->flag & OUTPUT) 
+            return clear_and_return(true);
+          push2stack_and_mark(wout);
         }
       }
     }
   }
 	//----------------------------------------------------------------------------------
-  return false; // X-path disappear
+  return clear_and_return(false); // X-path disappear
   //TODO 
 }/* end of trace_unknown_path */
 
