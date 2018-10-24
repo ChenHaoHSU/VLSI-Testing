@@ -465,7 +465,7 @@ bool ATPG::trace_unknown_path(const wptr w) {
     for (i = wtemp->onode.size() - 1; i >= 0; --i) {
       for (wptr wout : wtemp->onode[i]->owire) {
         if (sMarkedWire.count(wout->wlist_index) == 0
-           && wout->value == U) {
+            && wout->value == U) {
           if (wout->flag & OUTPUT) return true;
           wire_stack.push_front(wout);
           sMarkedWire.insert(wout->wlist_index);
@@ -489,7 +489,7 @@ bool ATPG::check_test(void) {
 	//HINT check every PO for their value
 	//--------------------------------- hole -------------------------------------------
   for (i = 0, ncktout = cktout.size(); i < ncktout; ++i) {
-    if ((cktout[i]->value == B) || (cktout[i]->value == D)) {
+    if ((cktout[i]->value == D) || (cktout[i]->value == B)) {
       is_test = true;
       break;
     }
