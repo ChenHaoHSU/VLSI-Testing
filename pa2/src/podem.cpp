@@ -456,19 +456,19 @@ bool ATPG::trace_unknown_path(const wptr w) {
   if (w->flag & OUTPUT) return true;
   // 2. If not, check all its fanout (DFS)
   forward_list<wptr> wire_stack;
-  unordered_set<int> sMarkedWire;
-  wire_stack.push_front(w);
-  sMarkedWire.insert(w->wlist_index); // Mark discovered wires
+  unordered_set<int> hash_marked_wires;
+  wire_stack.push_front(w); // push to stack
+  hash_marked_wires.insert(w->wlist_index); // Mark discovered wires
   while (!wire_stack.empty()) {
-    wtemp = wire_stack.front();
+    wtemp = wire_stack.front(); // stack pop
     wire_stack.pop_front();
     for (i = wtemp->onode.size() - 1; i >= 0; --i) {
       for (wptr wout : wtemp->onode[i]->owire) {
-        if (sMarkedWire.count(wout->wlist_index) == 0
+        if (hash_marked_wires.count(wout->wlist_index) == 0
             && wout->value == U) {
           if (wout->flag & OUTPUT) return true;
           wire_stack.push_front(wout);
-          sMarkedWire.insert(wout->wlist_index);
+          hash_marked_wires.insert(wout->wlist_index);
         }
       }
     }
