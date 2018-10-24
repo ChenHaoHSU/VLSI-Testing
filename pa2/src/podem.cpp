@@ -457,18 +457,18 @@ bool ATPG::trace_unknown_path(const wptr w) {
   // 2. If not, check all its fanout (DFS)
   #define DFS_MARKED 2048
   forward_list<wptr> wire_stack;
-  forward_list<wptr> marked_wires_flist;
+  forward_list<wptr> marked_wire_flist;
   auto clear_and_return = [&](const bool ret) -> bool {
-    while(!marked_wires_flist.empty()) {
-      marked_wires_flist.front()->flag &= ~DFS_MARKED;
-      marked_wires_flist.pop_front();
+    while(!marked_wire_flist.empty()) {
+      marked_wire_flist.front()->flag &= ~DFS_MARKED;
+      marked_wire_flist.pop_front();
     }
     return ret;
   };
   auto push2stack_and_mark = [&](wptr w) {
     wire_stack.push_front(w);         // push to stack
     w->flag |= DFS_MARKED;            // Mark discovered wires
-    marked_wires_flist.push_front(w); // Add to marked list
+    marked_wire_flist.push_front(w); // Add to marked list
   };
   push2stack_and_mark(w);
   while (!wire_stack.empty()) {
