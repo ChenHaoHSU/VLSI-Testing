@@ -458,34 +458,34 @@ bool ATPG::trace_unknown_path(const wptr w) {
   #define DFS_MARKED 2048
   forward_list<wptr> wire_stack;
   forward_list<wptr> marked_wire_flist;
-  auto clear_and_return = [&](const bool ret) -> bool {
+  auto __unmark_and_return = [&](const bool ret) -> bool {
     while(!marked_wire_flist.empty()) {
       marked_wire_flist.front()->flag &= ~DFS_MARKED;
       marked_wire_flist.pop_front();
     }
     return ret;
   };
-  auto push2stack_and_mark = [&](wptr w) {
+  auto __push2stack_and_mark = [&](wptr w) -> void {
     wire_stack.push_front(w);         // push to stack
-    w->flag |= DFS_MARKED;            // Mark discovered wires
-    marked_wire_flist.push_front(w); // Add to marked list
+    w->flag |= DFS_MARKED;            // mark discovered wires
+    marked_wire_flist.push_front(w);  // add to marked list
   };
-  push2stack_and_mark(w);
+  __push2stack_and_mark(w);
   while (!wire_stack.empty()) {
     wtemp = wire_stack.front(); // stack pop
     wire_stack.pop_front();     // stack pop
-    for (i = wtemp->onode.size() - 1; i >= 0; --i) {
+    for (i = 0, nout = wtemp->onode.size(); i < nout; ++i) {
       for (wptr wout : wtemp->onode[i]->owire) {
         if (!(wout->flag & DFS_MARKED) && (wout->value == U)) {
-          if (wout->flag & OUTPUT) 
-            return clear_and_return(true);
-          push2stack_and_mark(wout);
+          if (wout->flag & OUTPUT)
+            return __unmark_and_return(true);
+          __push2stack_and_mark(wout);
         }
       }
     }
   }
 	//----------------------------------------------------------------------------------
-  return clear_and_return(false); // X-path disappear
+  return __unmark_and_return(false); // X-path disappear
   //TODO 
 }/* end of trace_unknown_path */
 
