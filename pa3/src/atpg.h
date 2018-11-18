@@ -97,7 +97,9 @@ public:
 
   /*defined in tdfsim.cpp*/
   void transition_delay_fault_simulation();
-  
+  void tdfsim_a_vector(const string& vec, int& current_detect_num);
+  void tdfsim_good_sim(const string& vec, const bool is_v1);
+  void check_activate_fault();
 
   bool get_tdfsim_only(){return tdfsim_only;}
 
