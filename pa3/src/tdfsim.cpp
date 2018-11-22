@@ -17,12 +17,10 @@ void ATPG::transition_delay_fault_simulation() {
 
   // debug = 1;
 
-  int nn = 0;
-  for (auto pos = flist_undetect.cbegin(); pos != flist_undetect.cend(); ++pos) {
-    fptr f = *pos;
-    cerr << "[" << f->to_swlist << "] " << f->fault_type << endl;
-  }
-  cerr << sort_wlist.size() << endl;
+  // for (auto pos = flist_undetect.cbegin(); pos != flist_undetect.cend(); ++pos) {
+  //   fptr f = *pos;
+  //   cerr << "[" << f->fault_no << "][" << f->to_swlist << "] " << f->fault_type << endl;
+  // }
 
   /* for every vector */
   for (i = vectors.size() - 1; i >= 0; i--) {
@@ -47,9 +45,11 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
   fptr simulated_fault_list[num_of_pattern];
   fptr f;
   int fault_type;
-  int i,start_wire_index, nckt;
+  int i, start_wire_index, nckt, nout;
   int num_of_fault;
+  bool fault_active;
   
+  nout = cktout.size();
   num_of_fault = 0; // counts the number of faults in a packet
 
   /* num_of_current_detect is used to keep track of the number of undetected
@@ -87,14 +87,7 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
   /* expand the fault-free 0,1,2 value into 32 bits (2 = unknown)  
    * and store it in wire_value1 */
   for (i = 0; i < nckt; i++) {
-    switch (sort_wlist[i]->value) {
-    case 1: sort_wlist[i]->wire_value1 = ALL_ONE; // 11 represents logic one
-            break;
-    case 2: sort_wlist[i]->wire_value1 = 0x55555555; // 01 represents unknown
-            break;
-    case 0: sort_wlist[i]->wire_value1 = ALL_ZERO; // 00 represents logic zero
-            break;
-    }
+    sort_wlist[i]->value_v1 = sort_wlist[i]->value;
   } // for i
 
   /*************************
@@ -123,26 +116,28 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
    * and store it in wire_value2 */
   for (i = 0; i < nckt; i++) {
     switch (sort_wlist[i]->value) {
-    case 1: sort_wlist[i]->wire_value2 = ALL_ONE; // 11 represents logic one
-            break;
-    case 2: sort_wlist[i]->wire_value2 = 0x55555555; // 01 represents unknown
-            break;
-    case 0: sort_wlist[i]->wire_value2 = ALL_ZERO; // 00 represents logic zero
-            break;
+      case 1: sort_wlist[i]->wire_value1 = ALL_ONE; // 11 represents logic one
+              sort_wlist[i]->wire_value2 = ALL_ONE; break;
+      case 2: sort_wlist[i]->wire_value1 = 0x55555555; // 01 represents unknown
+              sort_wlist[i]->wire_value2 = 0x55555555; break;
+      case 0: sort_wlist[i]->wire_value1 = ALL_ZERO; // 00 represents logic zero
+              sort_wlist[i]->wire_value2 = ALL_ZERO; break;
     }
   } // for i
-
 
   /* walk through every undetected fault
    * the undetected fault list is linked by pnext_undetect */
   for (auto pos = flist_undetect.cbegin(); pos != flist_undetect.cend(); ++pos) {
     f = *pos;
-    if (f->detect == REDUNDANT) { continue;} /* ignore redundant faults */
+    if (f->detect == REDUNDANT) { continue; } /* ignore redundant faults */
 
     /* consider only active (aka. excited) fault
      * (STR(0) with correct output of 0 or STF(1) with correct output of 1) */
-    if ( (f->fault_type == STR) && (sort_wlist[f->to_swlist]->wire_value1 == ALL_ZERO) || 
-         (f->fault_type == STF) && (sort_wlist[f->to_swlist]->wire_value1 == ALL_ONE) ) {
+
+    fault_active = (f->fault_type == STR && sort_wlist[f->to_swlist]->value_v1 == 0) || 
+                   (f->fault_type == STF && sort_wlist[f->to_swlist]->value_v1 == 1);
+
+    if (fault_active) {
 
 	    /* if f is a primary output or is directly connected to an primary output
 	     * the fault is detected */
@@ -257,17 +252,17 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
 	      if (w->flag & OUTPUT) { // if primary output 
           for (i = 0; i < num_of_fault; i++) { // check every undetected fault
             if (!(simulated_fault_list[i]->detect)) {
-              if ((w->wire_value2 & Mask[i]) ^    // if value1 != value2
-                  (w->value & Mask[i])) {
-                if (((w->wire_value2 & Mask[i]) ^ Unknown[i])&&  // and not unknowns
-                    ((w->value & Mask[i]) ^ Unknown[i])){
+              if ((w->wire_value1 & Mask[i]) ^    // if value1 != value2
+                  (w->wire_value2 & Mask[i])) {
+                if (((w->wire_value1 & Mask[i]) ^ Unknown[i])&&  // and not unknowns
+                    ((w->wire_value2 & Mask[i]) ^ Unknown[i])){
                       simulated_fault_list[i]->detect = TRUE;  // then the fault is detected
                 }
               }
             }
           }
 	      }
-	      w->wire_value2 = w->value;  // reset to fault-free values
+	      w->wire_value2 = w->wire_value1;  // reset to fault-free values
         /*TODO*/
 	    } // pop out all faulty wires
       num_of_fault = 0;  // reset the counter of faults in a packet
@@ -337,9 +332,9 @@ void ATPG::tdf_fault_sim_evaluate(const wptr w) {
       break;
   }
 
-  /* if the new_value is different than the wire_value1 (the good value),
+  /* if the new_value is different than the value (the good value),
    * save it */
-  if (w->value != new_value) {
+  if (w->wire_value1 != new_value) {
 
     /* if this wire is faulty, make sure the fault remains injected */
     if (w->flag & FAULT_INJECTED) {
@@ -472,6 +467,4 @@ void ATPG::tdf_inject_fault_value(const wptr faulty_wire, const int& bit_positio
   faulty_wire->fault_flag |= Mask[bit_position];// bit position of the fault 
   /*TODO*/
 }/* end of tdf_inject_fault_value */
-
-
 

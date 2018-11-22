@@ -63,9 +63,6 @@ void ATPG::sim(void) {
     }
   }
   /*TODO*/
-
-
-  
 }/* end of sim */
 
 void ATPG::evaluate(nptr n) {
