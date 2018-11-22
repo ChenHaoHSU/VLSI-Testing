@@ -22,110 +22,63 @@ void ATPG::generate_fault_list(void) {
     w = *pos;
     n = w->inode.front();
     
-    /* for each gate, create a gate output stuck-at zero (SA0) fault */
+    /* for each gate, create a gate output slow-to-rise (STR) fault */
     f = move(fptr_s(new(nothrow) FAULT));
     if (f == nullptr) error("No more room!");
     f->node = n;
     f->io = GO;
-    f->fault_type = STUCK0;
+    f->fault_type = STR;
     f->to_swlist = w->wlist_index;
-    /* for AND NOR NOT BUF, their GI fault is equivalent to GO SA0 fault */
-    switch (n->type) {
-      case   AND:
-      case   NOR:
-      case   NOT:
-      case   BUF:
-        f->eqv_fault_num = 1;
-        for (wptr wptr_ele: w->inode.front()->iwire) {
-          if (wptr_ele->onode.size() > 1) f->eqv_fault_num++;
-        }
-        break;
-      case INPUT:
-      case    OR:
-      case  NAND: 
-      case   EQV:
-      case   XOR: f->eqv_fault_num = 1; break;
-    }
+    f->eqv_fault_num = 1;
     num_of_gate_fault += f->eqv_fault_num; // accumulate total fault count
     flist_undetect.push_front(f.get()); // initial undetected fault list contains all faults
     flist.push_front(move(f));  // push into the fault list
     
-    /* for each gate, create a gate output stuck-at one (SA1) fault */
+    /* for each gate, create a gate output slow-to-fall (STF) fault */
     f = move(fptr_s(new(nothrow) FAULT));
     if (f == nullptr) error("No more room!");
     f->node = n;
     f->io = GO;
-    f->fault_type = STUCK1;
+    f->fault_type = STF;
     f->to_swlist = w->wlist_index;
-    /* for OR NAND NOT BUF, their GI fault is equivalent to GO SA1 fault */
-    switch (n->type) {
-      case    OR:
-      case  NAND:
-      case   NOT:
-      case   BUF:
-        f->eqv_fault_num = 1;
-        for (wptr wptr_ele: w->inode.front()->iwire) {
-          if (wptr_ele->onode.size() > 1) f->eqv_fault_num++;
-        }
-        break;
-      case INPUT:
-      case   AND:
-      case   NOR: 
-      case   EQV:
-      case   XOR: f->eqv_fault_num = 1; break;
-    }
+    f->eqv_fault_num = 1;
     num_of_gate_fault += f->eqv_fault_num;
     flist_undetect.push_front(f.get());
     flist.push_front(move(f));
+
     /*if w has multiple fanout branches */
     if (w->onode.size() > 1) {
       for (nptr nptr_ele: w->onode) {
-        /* create SA0 for OR NOR EQV XOR gate inputs  */
-        switch (nptr_ele->type) {
-          case OUTPUT:
-          case     OR:
-          case    NOR: 
-          case    EQV:
-          case    XOR:
-            f = move(fptr_s(new(nothrow) FAULT));
-            if (f == nullptr) error("No more room!");
-            f->node = nptr_ele;
-            f->io = GI;
-            f->fault_type = STUCK0;
-            f->to_swlist = w->wlist_index;
-            f->eqv_fault_num = 1;
-			      /* f->index is the index number of gate input, 
-			         which GI fault is associated with*/
-            for (int k = 0; k < nptr_ele->iwire.size(); k++) {  
-              if (nptr_ele->iwire[k] == w) f->index = k;
-            }
-            num_of_gate_fault++;
-            flist_undetect.push_front(f.get());
-            flist.push_front(move(f));
-            break;
+        /* create STR for gate inputs  */
+        f = move(fptr_s(new(nothrow) FAULT));
+        if (f == nullptr) error("No more room!");
+        f->node = nptr_ele;
+        f->io = GI;
+        f->fault_type = STR;
+        f->to_swlist = w->wlist_index;
+        f->eqv_fault_num = 1;
+        /* f->index is the index number of gate input, 
+            which GI fault is associated with*/
+        for (int k = 0; k < nptr_ele->iwire.size(); k++) {  
+          if (nptr_ele->iwire[k] == w) f->index = k;
         }
-        /* create SA1 for AND NAND EQV XOR gate inputs  */
-        switch (nptr_ele->type) {
-          case OUTPUT:
-          case   AND:
-          case  NAND: 
-          case   EQV:
-          case   XOR:
-            f = move(fptr_s(new(nothrow) FAULT));
-            if (f == nullptr) error("No more room!");
-            f->node = nptr_ele;
-            f->io = GI;
-            f->fault_type = STUCK1;
-            f->to_swlist = w->wlist_index;
-            f->eqv_fault_num = 1;
-            for (int k = 0; k < nptr_ele->iwire.size(); k++) {
-              if (nptr_ele->iwire[k] == w) f->index = k;
-            }
-            num_of_gate_fault++;
-            flist_undetect.push_front(f.get());
-            flist.push_front(move(f));
-            break;
+        num_of_gate_fault++;
+        flist_undetect.push_front(f.get());
+        flist.push_front(move(f));
+        /* create STF for gate inputs  */
+        f = move(fptr_s(new(nothrow) FAULT));
+        if (f == nullptr) error("No more room!");
+        f->node = nptr_ele;
+        f->io = GI;
+        f->fault_type = STF;
+        f->to_swlist = w->wlist_index;
+        f->eqv_fault_num = 1;
+        for (int k = 0; k < nptr_ele->iwire.size(); k++) {
+          if (nptr_ele->iwire[k] == w) f->index = k;
         }
+        num_of_gate_fault++;
+        flist_undetect.push_front(f.get());
+        flist.push_front(move(f));
       }
     }
   }
