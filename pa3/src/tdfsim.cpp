@@ -136,10 +136,15 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
     /* consider only active (aka. excited) fault
      * (STR(0) with correct output of 0 or STF(1) with correct output of 1) */
 
-    fault_active = (f->fault_type == STR && sort_wlist[f->to_swlist]->value_v1 == 0 
-                    && sort_wlist[f->to_swlist]->value == 1) || 
-                   (f->fault_type == STF && sort_wlist[f->to_swlist]->value_v1 == 1
-                    && sort_wlist[f->to_swlist]->value == 0);
+    fault_active = false;
+    switch (f->fault_type) {
+      case STR: fault_active = (sort_wlist[f->to_swlist]->value_v1 == 0 &&
+                                sort_wlist[f->to_swlist]->value == 1);
+                break;
+      case STF: fault_active = (sort_wlist[f->to_swlist]->value_v1 == 1 &&
+                                sort_wlist[f->to_swlist]->value == 0);
+                break;
+    }
 
     if (fault_active) {
 	    /* if f is a primary output or is directly connected to an primary output
@@ -374,9 +379,6 @@ ATPG::wptr ATPG::tdf_get_faulty_wire(const fptr f, int& fault_type) {
   wptr faulty_wire;
   nin = f->node->iwire.size();
   switch(f->node->type) {
-
-       /* this case should not occur,
-        * because we do not create fault in the NOT BUF gate input */
     case NOT:
       switch (f->fault_type) {
         case STR: fault_type = STF; break;
@@ -389,8 +391,6 @@ ATPG::wptr ATPG::tdf_get_faulty_wire(const fptr f, int& fault_type) {
         case STF: fault_type = STF; break;
       }
       break;
-	  /*check every gate input of AND 
-	   if any input is zero or unknown, then fault f is not propagated */ 
     case AND:
       for (i = 0; i < nin; i++) {
         if (f->node->iwire[i] != sort_wlist[f->to_swlist]) {
@@ -486,4 +486,3 @@ void ATPG::tdf_inject_fault_value(const wptr faulty_wire, const int& bit_positio
   faulty_wire->fault_flag |= Mask[bit_position];// bit position of the fault 
   /*TODO*/
 }/* end of tdf_inject_fault_value */
-
