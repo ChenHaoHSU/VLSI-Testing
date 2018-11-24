@@ -244,6 +244,7 @@ private:
     int fault_flag;            /* indicates the fault-injected bit position, for pfedfs */
     int wlist_index;           /* index into the sorted_wlist array */
     int value_v1;
+    int wire_value_v1;
   };
   
   class NODE {

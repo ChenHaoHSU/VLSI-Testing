@@ -91,7 +91,7 @@ void ATPG::generate_fault_list(void) {
     //cout << f->fault_no << f->node->name << ":" << (f->io?"O":"I") << (f->io?9:(f->index)) << "SA" << f->fault_type << endl;
   }
 
-  fprintf(stdout,"#number of equivalent faults = %d\n", fault_num);
+  // fprintf(stdout,"#number of equivalent faults = %d\n", fault_num);
 }/* end of generate_fault_list */
 
 /* computing the actual fault coverage */
