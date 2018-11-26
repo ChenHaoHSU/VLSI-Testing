@@ -82,14 +82,6 @@ void ATPG::tdfsim_a_vector(const string& vec, int& num_of_current_detect) {
    * and store it in wire_value1 */
   for (i = 0; i < nckt; i++) {
     sort_wlist[i]->value_v1 = sort_wlist[i]->value;
-    switch (sort_wlist[i]->value) {
-      case 1: sort_wlist[i]->wire_value_v1 = ALL_ONE; // 11 represents logic one
-              break;
-      case 2: sort_wlist[i]->wire_value_v1 = 0x55555555; // 01 represents unknown
-              break;
-      case 0: sort_wlist[i]->wire_value_v1 = ALL_ZERO; // 00 represents logic zero
-              break;
-    }
   } // for i
 
   /*************************
